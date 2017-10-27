@@ -36,7 +36,7 @@ class Configure
       opts = Trollop.options do
         opt(
           :project_name,
-          'Name of project',
+          'GitHub project name',
           type: :string, short: 'n', required: true
         )
         opt(
