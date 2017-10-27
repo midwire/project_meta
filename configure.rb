@@ -46,6 +46,11 @@ class Configure
         )
 
         opt(
+          :rubocop,
+          'Copy the .rubocop.yml template',
+          type: :boolean, short: 'r', required: false, default: true
+        )
+        opt(
           :verbose,
           'Be verbose with the output',
           type: :boolean, short: 'v', required: false, default: false
@@ -99,6 +104,10 @@ class Configure
       File.open(output_file, 'w') do |file|
         file.write(html)
       end
+    end
+    # Also copy the .rubocop.yml file
+    if options[:rubocop]
+      FileUtils.cp(File.join(root, '.rubocop.yml'), File.join(options[:project_path], '.rubocop.yml'))
     end
   end
 
