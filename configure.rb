@@ -1,24 +1,24 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
+
 # Configure docs:
 #
 # Configure a new project with the templates in this directory.
 
-require 'trollop'
+require 'optimist'
 require 'fileutils'
 require 'colored'
 require 'erb'
 require 'active_support/all'
-require 'pry-nav'
+require 'pry'
 
 class Configure
+  include FileUtils
   attr_accessor :file_count, :options, :elapsed
 
   class ReplaceableTags
-    attr_accessor :project_new_issue_url
-    attr_accessor :project_issues_url
-    attr_accessor :project_home_url
-    attr_accessor :project_name
-    attr_accessor :project_name_titleized
+    attr_accessor :project_new_issue_url, :project_issues_url, :project_home_url, :project_name,
+      :project_name_titleized
 
     def initialize(project_name)
       self.project_name = project_name
@@ -29,11 +29,9 @@ class Configure
     end
   end
 
-  include FileUtils
-
   class << self
     def collect_args(*_args)
-      opts = Trollop.options do
+      Optimist.options do
         opt(
           :project_name,
           'GitHub project name',
@@ -61,7 +59,6 @@ class Configure
           type: :boolean, short: 'c', required: false, default: true
         )
       end
-      opts
     end
 
     def run
@@ -96,19 +93,18 @@ class Configure
   def process
     Dir.glob(File.join(root, '*.md')) do |template|
       next if %w[README.md].include? File.basename(template)
+
       output_file = File.join(options[:project_path], File.basename(template))
       puts(">>> Processing #{output_file}")
       contents = File.read(template)
       @tags = ReplaceableTags.new(options[:project_name])
       html = ERB.new(contents).result(binding)
-      File.open(output_file, 'w') do |file|
-        file.write(html)
-      end
+      File.write(output_file, html)
     end
     # Also copy the .rubocop.yml file
-    if options[:rubocop]
-      FileUtils.cp(File.join(root, '.rubocop.yml'), File.join(options[:project_path], '.rubocop.yml'))
-    end
+    return unless options[:rubocop]
+
+    FileUtils.cp(File.join(root, '.rubocop.yml'), File.join(options[:project_path], '.rubocop.yml'))
   end
 
   private

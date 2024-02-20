@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 source 'https://rubygems.org'
 
 gem 'activesupport'
 gem 'colored'
-gem 'pry-nav'
-gem 'trollop'
+gem 'pry'
+gem 'optimist'
